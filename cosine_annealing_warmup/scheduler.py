@@ -25,6 +25,8 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
                  last_epoch : int = -1
         ):
         assert warmup_steps < first_cycle_steps
+
+        self.optimizer = optimizer
         
         self.first_cycle_steps = first_cycle_steps # first cycle step size
         self.cycle_mult = cycle_mult # cycle steps magnification
@@ -37,6 +39,7 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
         self.cur_cycle_steps = first_cycle_steps # first cycle step size
         self.cycle = 0 # cycle count
         self.step_in_cycle = last_epoch # step size of the current cycle
+        self._last_lr = [group['lr'] for group in self.optimizer.param_groups]
         
         super(CosineAnnealingWarmupRestarts, self).__init__(optimizer, last_epoch)
         
@@ -86,3 +89,5 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
         self.last_epoch = math.floor(epoch)
         for param_group, lr in zip(self.optimizer.param_groups, self.get_lr()):
             param_group['lr'] = lr
+
+        self._last_lr = [group['lr'] for group in self.optimizer.param_groups]
